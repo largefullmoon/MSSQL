@@ -16,8 +16,8 @@ logging.basicConfig(filename='actions.log', level=logging.DEBUG, format='%(ascti
 
 # Function to connect to MSSQL database
 def connect_to_database():
-    connection_string = 'DRIVER={SQL Server};Server=DESKTOP-EJ2R166;Database=dmlz_mshist;Trusted_Connection=True;'
-    # connection_string = 'DRIVER={SQL Server};Server=B-Rad;Database=dmlz_mshist;Trusted_Connection=True;'
+    # connection_string = 'DRIVER={SQL Server};Server=DESKTOP-EJ2R166;Database=dmlz_mshist;Trusted_Connection=True;'
+    connection_string = 'DRIVER={SQL Server};Server=B-Rad;Database=dmlz_mshist;Trusted_Connection=True;'
     logging.info('Connected to DB ok')
     conn = pyodbc.connect(connection_string)
     return conn.cursor()
