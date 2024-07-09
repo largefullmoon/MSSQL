@@ -1,2 +1,5 @@
 # Ignore the node_modules directory
 venv/
+# Ignore report files.
+Report*
+actions.log
