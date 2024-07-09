@@ -16,8 +16,8 @@ logging.basicConfig(filename='actions.log', level=logging.DEBUG, format='%(ascti
 
 # Function to connect to MSSQL database
 def connect_to_database():
-    connection_string = 'DRIVER={SQL Server};Server=DESKTOP-EJ2R166;Database=dmlz_mshist;Trusted_Connection=True;'
-    # connection_string = 'DRIVER={SQL Server};Server=B-Rad;Database=dmlz_mshist;Trusted_Connection=True;'
+    # connection_string = 'DRIVER={SQL Server};Server=DESKTOP-EJ2R166;Database=dmlz_mshist;Trusted_Connection=True;'
+    connection_string = 'DRIVER={SQL Server};Server=B-Rad;Database=dmlz_mshist;Trusted_Connection=True;'
     logging.info('Connected to DB ok')
     conn = pyodbc.connect(connection_string)
     return conn.cursor()
@@ -198,7 +198,7 @@ def schedule_json_generation():
     for serial_number in serial_numbers:
         serial_number = serial_number[0]
         
-        schedule.every(1).minutes.do(generate_json_for_machine, serial_number)
+        schedule.every(5).minutes.do(generate_json_for_machine, serial_number)
         time.sleep(5)
         
     while True:
