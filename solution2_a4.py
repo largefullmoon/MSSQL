@@ -16,8 +16,8 @@ logging.basicConfig(filename='actions.log', level=logging.DEBUG, format='%(ascti
 
 # Function to connect to MSSQL database
 def connect_to_database():
-    # connection_string = 'DRIVER={SQL Server};Server=DESKTOP-EJ2R166;Database=dmlz_mshist;Trusted_Connection=True;'
-    connection_string = 'DRIVER={SQL Server};Server=B-Rad;Database=dmlz_mshist;Trusted_Connection=True;'
+    connection_string = 'DRIVER={SQL Server};Server=DESKTOP-EJ2R166;Database=dmlz_mshist;Trusted_Connection=True;'
+    # connection_string = 'DRIVER={SQL Server};Server=B-Rad;Database=dmlz_mshist;Trusted_Connection=True;'
     logging.info('Connected to DB ok')
     conn = pyodbc.connect(connection_string)
     return conn.cursor()
@@ -68,9 +68,8 @@ def generate_json_for_machine(serial_number):
         })
     #Alerts 
  #Retrieve alert from event log   
-    query = "SELECT top 10 DURATION AS AlarmActiveTime, EVENT_OID AS AlarmInstanceCount, HELEVEL AS AlarmCount, operator AS AlarmOperatorName, DATEADD(hh,9,SOURCE_TIMESTAMP_UTC) AS AlarmStartTime, MID AS Code,vmd.description AS Description ,CASE WHEN TYPE = 'Health Data' THEN 'PAlarm' ELSE 'null' END AS State,SOURCE_TIMESTAMP_UTC AS Timestamp ,ALARM_DESCRIPTION AS Title, vm.serialNumber AS Device, vm.name AS machine_N,vm.machineClass_N AS DeviceModel FROM dmlz_mshist.dbo.HEALTH_EVENT he INNER JOIN dmlz_mshist.dbo.V_MACHINE vm ON vm.OID = he.MACHINE_OID INNER JOIN dmlz_mshist.dbo.V_MID_DEF vmd ON vmd.OID = he.MID where Type = 'Health Data' AND he.CLASS_ID = 'Deactivate' "   
-    cursor.execute(query)
-    # cursor.execute(query, (serial_number))
+    query = "SELECT top 10 DURATION AS AlarmActiveTime, EVENT_OID AS AlarmInstanceCount, HELEVEL AS AlarmCount, operator AS AlarmOperatorName, DATEADD(hh,9,SOURCE_TIMESTAMP_UTC) AS AlarmStartTime, MID AS Code,vmd.description AS Description ,CASE WHEN TYPE = 'Health Data' THEN 'PAlarm' ELSE 'null' END AS State,SOURCE_TIMESTAMP_UTC AS Timestamp ,ALARM_DESCRIPTION AS Title, vm.serialNumber AS Device, vm.name AS machine_N,vm.machineClass_N AS DeviceModel FROM dmlz_mshist.dbo.HEALTH_EVENT he INNER JOIN dmlz_mshist.dbo.V_MACHINE vm ON vm.OID = he.MACHINE_OID INNER JOIN dmlz_mshist.dbo.V_MID_DEF vmd ON vmd.OID = he.MID where vm.serialNumber = ? AND Type = 'Health Data' AND he.CLASS_ID = 'Deactivate' "   
+    cursor.execute(query, (serial_number))
     alert_data = cursor.fetchall()
     NewAlerts=[]
  
@@ -90,6 +89,8 @@ def generate_json_for_machine(serial_number):
         Title = (row.Title)
         NewAlerts.append({
             #"Alert Type": "AAlarm",
+            "Machine Name": Machine,
+            "Device": machine_id,
             "AlarmActiveTime": AlarmActiveTime, #.strftime('%Y-%m-%d %H:%M:%S'),
             "AlarmCount": AlarmCount,
             "AlarmInstanceCount":  AlarmInstanceCount,
@@ -104,9 +105,8 @@ def generate_json_for_machine(serial_number):
         print(row)
         #Alerts PAlaram Health Maintenance
 #Retrieve event from event log 
-    query = "SELECT top 10 DURATION AS AlarmActiveTime, EVENT_OID AS AlarmInstanceCount, HELEVEL AS AlarmCount, operator AS AlarmOperatorName, DATEADD(hh,9,SOURCE_TIMESTAMP_UTC) AS AlarmStartTime, MID AS Code,vmd.description AS Description ,CASE WHEN TYPE = 'Health Maintenance' THEN 'AAlarm' ELSE 'null' END AS State,SOURCE_TIMESTAMP_UTC AS Timestamp ,ALARM_DESCRIPTION AS Title, vm.serialNumber AS Device, vm.name AS machine_N,vm.machineClass_N AS DeviceModel FROM dmlz_mshist.dbo.HEALTH_EVENT he INNER JOIN dmlz_mshist.dbo.V_MACHINE vm ON vm.OID = he.MACHINE_OID INNER JOIN dmlz_mshist.dbo.V_MID_DEF vmd ON vmd.OID = he.MID where Type = 'Health Maintenance' AND he.CLASS_ID = 'Deactivate' "   
-    cursor.execute(query)
-    # cursor.execute(query, (serial_number,))
+    query = "SELECT top 10 DURATION AS AlarmActiveTime, EVENT_OID AS AlarmInstanceCount, HELEVEL AS AlarmCount, operator AS AlarmOperatorName, DATEADD(hh,9,SOURCE_TIMESTAMP_UTC) AS AlarmStartTime, MID AS Code,vmd.description AS Description ,CASE WHEN TYPE = 'Health Maintenance' THEN 'AAlarm' ELSE 'null' END AS State,SOURCE_TIMESTAMP_UTC AS Timestamp ,ALARM_DESCRIPTION AS Title, vm.serialNumber AS Device, vm.name AS machine_N,vm.machineClass_N AS DeviceModel FROM dmlz_mshist.dbo.HEALTH_EVENT he INNER JOIN dmlz_mshist.dbo.V_MACHINE vm ON vm.OID = he.MACHINE_OID INNER JOIN dmlz_mshist.dbo.V_MID_DEF vmd ON vmd.OID = he.MID where vm.serialNumber = ? AND Type = 'Health Maintenance' AND he.CLASS_ID = 'Deactivate' "   
+    cursor.execute(query, (serial_number,))
     event_data = cursor.fetchall()
     events = []
  
@@ -125,6 +125,8 @@ def generate_json_for_machine(serial_number):
         Title = (row.Title)
         events.append({
             #"Alert Type": "PAlarm",
+            "Machine Name": Machine,
+            "Device": machine_id,
             "AlarmActiveTime": AlarmActiveTime, #.strftime('%Y-%m-%d %H:%M:%S'),
             "AlarmCount": AlarmCount,
             "AlarmInstanceCount":  AlarmInstanceCount,
